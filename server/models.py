@@ -27,12 +27,10 @@ class Exercise(db.Model):
     
 class ExerciseSchema(Schema):
     id = fields.Integer()
-    name = fields.String()
-    category = fields.String()
-    equipment_needed = fields.Boolean
-    workout_exercises = fields.Nested('WorkoutExercisesSchema', many=True, exclude=('exercise',))
-
     name = fields.String(required=True, validate=validate.Length(min=1, max=100))
+    category = fields.String()
+    equipment_needed = fields.Boolean()
+    workout_exercises = fields.Nested('WorkoutExercisesSchema', many=True, exclude=('exercise',))
 
 
 
@@ -58,6 +56,8 @@ class Workout(db.Model):
     def validate_notes(self, key, notes):
         if notes and len(notes) > 1000:
             raise ValueError('Cannot be longer than 1000 characters.')
+        
+        return notes
         
 class WorkoutSchema(Schema):
     id = fields.Integer()
@@ -94,3 +94,15 @@ class WorkoutExercisesSchema(Schema):
     exercises = fields.Nested('ExerciseSchema', exclude=('workout_exercises',))
 
     duration_seconds = fields.Integer(validate=validate.Range(min=1))
+
+
+
+
+exercise_schema = ExerciseSchema()
+exercises_schema = ExerciseSchema(many=True)
+
+workout_schema = WorkoutSchema()
+workouts_schema = WorkoutSchema(many=True)
+
+workout_exercises_schema = WorkoutExercisesSchema()
+workout_exercises_schemas = WorkoutExercisesSchema(many=True)
