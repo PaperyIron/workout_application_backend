@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
+from marshmallow import Schema, fields
 db = SQLAlchemy()
 
 # Define Models here
@@ -23,6 +24,14 @@ class Exercise(db.Model):
             raise ValueError('Name must be 50 characters or less.')
         
         return name.strip()
+    
+class ExerciseSchema(Schema):
+    id = fields.Integer()
+    name = fields.String()
+    category = fields.String()
+    equipment_needed = fields.Boolean
+    workout_exercises = fields.Nested('WorkoutExercisesSchema', many=True, exclude=('exercise',))
+
 
 
 class Workout(db.Model):
@@ -47,6 +56,14 @@ class Workout(db.Model):
     def validate_notes(self, key, notes):
         if notes and len(notes) > 1000:
             raise ValueError('Cannot be longer than 1000 characters.')
+        
+class WorkoutSchema(Schema):
+    id = fields.Integer()
+    date = fields.Date()
+    duration_minutes = fields.Integer()
+    notes = fields.String()
+    workout_exercises = fields.Nested('WorkoutExercisesSchema', many=True, exclude=('workout',))
+
 
 
 class WorkoutExercises(db.Model):
@@ -61,3 +78,13 @@ class WorkoutExercises(db.Model):
 
     workout = db.relationship('Workout', back_populates='workout_exercises')
     exercise = db.relationship('Exercise', back_populates='workout_exercises')
+
+class WorkoutExercisesSchema(Schema):
+    id = fields.Integer()
+    workout_id = fields.Integer()
+    exercise_id = fields.Integer()
+    reps = fields.Integer()
+    sets = fields.Integer()
+    duration_seconds = fields.Integer()
+    workout = fields.Nested('WorkoutSchema', exclude=('workout_exercises',))
+    exercises = fields.Nested('ExerciseSchema', exclude=('workout_exercises',))
