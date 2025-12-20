@@ -11,12 +11,12 @@ class Exercise(db.Model):
     category = db.Column(db.String, nullable=False)
     equipment_needed = db.Column(db.Boolean)
 
-    workout_exercises = db.relationship('WorkoutExercises', back_populates='exercise')
-    workouts = db.relationship('Workout', secondary= 'workout_exercises', back_populates='exercises')
+    workout_exercises = db.relationship('WorkoutExercises', back_populates='exercise', cascade='all, delete-orphan')
+    workouts = db.relationship('Workout', secondary= 'workout_exercises', back_populates='exercises', viewonly=True)
 
     @validates('name')
     def validate_name(self, key, name):
-        if not name or len(name.strip) == 0:
+        if not name or len(name.strip()) == 0:
             raise ValueError('Name cannot be empty')
         
         if len(name) > 50:
@@ -33,8 +33,8 @@ class Workout(db.Model):
     duration_minutes = db.Column(db.Integer)
     notes = db.Column(db.Text)
 
-    workout_exercises = db.relationship('WorkoutExercises', back_populates='workout')
-    exercises = db.relationship('Exercise', secondary='workout_exercises', back_populates='workouts')
+    workout_exercises = db.relationship('WorkoutExercises', back_populates='workout', cascade='all, delete-orphan')
+    exercises = db.relationship('Exercise', secondary='workout_exercises', back_populates='workouts', viewonly=True)
 
     @validates('duration_minutes')
     def validate_duration_minutes(self, key, duration_minutes):
