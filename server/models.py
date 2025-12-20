@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validate
 db = SQLAlchemy()
 
 # Define Models here
@@ -31,6 +31,8 @@ class ExerciseSchema(Schema):
     category = fields.String()
     equipment_needed = fields.Boolean
     workout_exercises = fields.Nested('WorkoutExercisesSchema', many=True, exclude=('exercise',))
+
+    name = fields.String(required=True, validate=validate.Length(min=1, max=100))
 
 
 
@@ -64,6 +66,8 @@ class WorkoutSchema(Schema):
     notes = fields.String()
     workout_exercises = fields.Nested('WorkoutExercisesSchema', many=True, exclude=('workout',))
 
+    notes = fields.String(validate=validate.Length(max=1000))
+
 
 
 class WorkoutExercises(db.Model):
@@ -88,3 +92,5 @@ class WorkoutExercisesSchema(Schema):
     duration_seconds = fields.Integer()
     workout = fields.Nested('WorkoutSchema', exclude=('workout_exercises',))
     exercises = fields.Nested('ExerciseSchema', exclude=('workout_exercises',))
+
+    duration_seconds = fields.Integer(validate=validate.Range(min=1))
